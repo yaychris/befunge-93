@@ -1,0 +1,41 @@
+module Befunge
+  Commands = {
+    "0"   =>  lambda { @stack.push(0) },
+    "1"   =>  lambda { @stack.push(1) },
+    "2"   =>  lambda { @stack.push(2) },
+    "3"   =>  lambda { @stack.push(3) },
+    "4"   =>  lambda { @stack.push(4) },
+    "5"   =>  lambda { @stack.push(5) },
+    "6"   =>  lambda { @stack.push(6) },
+    "7"   =>  lambda { @stack.push(7) },
+    "8"   =>  lambda { @stack.push(8) },
+    "9"   =>  lambda { @stack.push(9) },
+    "+"   =>  lambda { @stack.push(@stack.pop + @stack.pop) }, 
+    "-"   =>  lambda { @stack.push(-1 * (@stack.pop - @stack.pop)) }, 
+    "*"   =>  lambda { @stack.push(@stack.pop * @stack.pop) }, 
+    "/"   =>  lambda { val2, val1 = @stack.pop, @stack.pop; @stack.push(val1 / val2) }, 
+    "%"   =>  lambda { val2, val1 = @stack.pop, @stack.pop; @stack.push(val1 % val2) }, 
+    "!"   =>  lambda { @stack.push(@stack.pop != 0 ? 0 : 1) }, 
+    "`"   =>  lambda { @stack.push(@stack.pop < @stack.pop ? 1 : 0) }, 
+    ">"   =>  lambda { @pc.direction = :right }, 
+    "<"   =>  lambda { @pc.direction = :left }, 
+    "^"   =>  lambda { @pc.direction = :up }, 
+    "v"   =>  lambda { @pc.direction = :down }, 
+    "?"   =>  lambda { @pc.direction = Directions[1 + rand(4)] }, 
+    "_"   =>  lambda { @pc.direction = @stack.pop == 0 ? :right : :left }, 
+    "|"   =>  lambda { @pc.direction = @stack.pop == 0 ? :down : :up }, 
+    "\""  =>  lambda { tick_pc; while (char = current_cell) != "\"" do @stack.push(char[0]); tick_pc; end }, 
+    ":"   =>  lambda { @stack.push(@stack.top) }, 
+    "\\"  =>  lambda { val2, val1 = @stack.pop, @stack.pop; @stack.push(val2); @stack.push(val1) }, 
+    "$"   =>  lambda { @stack.pop }, 
+    "."   =>  lambda { @output += @stack.pop.to_s },
+    ","   =>  lambda { @output += @stack.pop.chr },
+    "#"   =>  lambda { tick_pc }, 
+    "g"   =>  lambda { row, col = @stack.pop, @stack.pop; @stack.push(@program[row][col][0]) }, 
+    "p"   =>  lambda { row, col, val = @stack.pop, @stack.pop, @stack.pop; @program[row][col] = val.chr }, 
+    "&"   =>  lambda {  }, # TODO
+    "~"   =>  lambda {  }, # TODO
+    "@"   =>  lambda {  }, 
+    " "   =>  lambda {  }
+  }
+end
