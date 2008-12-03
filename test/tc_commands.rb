@@ -9,7 +9,7 @@ require "test_helper"
 ####
 module Befunge
   class Interpreter
-    attr_accessor :stack, :program, :pc
+    attr_accessor :stack, :program, :pc, :int_input, :ascii_input
   end
   
   class Stack
@@ -205,6 +205,44 @@ END_INPUT
     
     @befunge.run
     assert_equal("+", @befunge.program[1][0])
+  end
+  
+  
+  def test_int_input_ampersand
+    parse("&&+@")
+    
+    @befunge.int_input = [4, 5]
+    step
+    assert_equal([4], stack_data)
+    step
+    assert_equal([5, 4], stack_data)
+    step
+    assert_equal([9], stack_data)
+    assert_equal([], @befunge.int_input)
+    
+    @befunge.restart
+    parse("&,@")
+    
+    @befunge.run :int_input => [65]
+    assert_equal("A", @befunge.output)
+  end
+  
+  
+  def est_ascii_input_tilde
+    parse("~~@")
+    
+    @befunge.ascii_input = ["A", "B"]
+    step
+    assert_equal([65], stack_data)
+    step
+    assert_equal([66, 65], stack_data)
+    assert_equal([], @befunge.int_input)
+    
+    @befunge.restart
+    parse("~.@")
+    
+    @befunge.run :ascii_input => ["A"]
+    assert_equal("65", @befunge.output)
   end
   
 end

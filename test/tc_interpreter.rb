@@ -88,6 +88,27 @@ END_COMPLEX
   
   
   ####
+  # Test input
+  ####
+  def test_assigns_empty_ascii_input
+    assert_equal([], @befunge.ascii_input)
+  end
+  
+  def test_assigns_empty_int_input
+    assert_equal([], @befunge.int_input)
+  end
+  
+  def test_accepts_input_to_run
+    parse("@")
+    
+    @befunge.run :ascii_input => [">", "^", "<", "v"], :int_input => [1, 2, 3, 4]
+    
+    assert_equal([">", "^", "<", "v"], @befunge.ascii_input)
+    assert_equal([1, 2, 3, 4], @befunge.int_input)
+  end
+  
+  
+  ####
   # Test PC movement
   ####
   def test_step_pc_right

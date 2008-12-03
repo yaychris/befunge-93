@@ -33,8 +33,8 @@ module Befunge
     "#"   =>  lambda { tick_pc }, 
     "g"   =>  lambda { row, col = @stack.pop, @stack.pop; @stack.push(@program[row][col][0]) }, 
     "p"   =>  lambda { row, col, val = @stack.pop, @stack.pop, @stack.pop; @program[row][col] = val.chr }, 
-    "&"   =>  lambda {  }, # TODO
-    "~"   =>  lambda {  }, # TODO
+    "&"   =>  lambda { @stack.push(@int_input.shift.to_i) }, 
+    "~"   =>  lambda { @stack.push(@ascii_input.shift) },
     "@"   =>  lambda {  }, 
     " "   =>  lambda {  }
   }

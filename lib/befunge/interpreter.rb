@@ -4,14 +4,17 @@ module Befunge
   
   class Interpreter
     attr_reader :output
+    attr_reader :ascii_input, :int_input
     
     PC = Struct.new(:row, :col, :direction)
     
     def initialize
-      @stack    = Stack.new
-      @program  = []
-      @pc       = PC.new(0, 0, :right)
-      @output   = ""
+      @stack      = Stack.new
+      @program    = []
+      @pc         = PC.new(0, 0, :right)
+      @output     = ""
+      @ascii_input = []
+      @int_input  = []
     end
     
     def parse(input)
@@ -34,7 +37,10 @@ module Befunge
       true
     end
     
-    def run
+    def run(options = {})
+      @ascii_input  = options[:ascii_input] || []
+      @int_input    = options[:int_input] || []
+      
       loop do
         break if !step
       end
@@ -42,7 +48,10 @@ module Befunge
     
     def restart
       @stack = Stack.new
-      @pc.row, @pc.col = 0, 0
+      @pc = PC.new(0, 0, :right)
+      @ascii_input = []
+      @int_input = []
+      @output = ""
       self
     end
     

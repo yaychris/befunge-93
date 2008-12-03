@@ -127,4 +127,19 @@ END_PROGRAM
     assert_equal(program, @befunge.output)
   end
   
+  
+  def test_factorial
+    program = <<END_PROGRAM
+                                    v
+>v"Please enter a number (1-16) : "0<
+,:             >$*99g1-:99p#v_.25*,@
+^_&:1-99p>:1-:!|10          < 
+         ^     <
+END_PROGRAM
+    
+    parse(program)
+    @befunge.run :int_input => [6]
+    assert_equal("Please enter a number (1-16) : 720\n", @befunge.output)
+  end
+  
 end
