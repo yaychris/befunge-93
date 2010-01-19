@@ -1,45 +1,46 @@
 require "test_helper"
 
 class TestBefungeCommands < Befunge::TestCase
-  def setup
+  setup do
     @befunge = Befunge::Interpreter.new
   end
 
-  def test_addition
+  test "addition" do
     parse "95+"
-
-    step; assert_equal [9], stack_data
-    step; assert_equal [5, 9], stack_data
-    step; assert_equal [14], stack_data
+    step
+    assert_equal [9], stack_data
+    step
+    assert_equal [5, 9], stack_data
+    step
+    assert_equal [14], stack_data
   end
 
-  def test_subtraction
+  test "subtraction" do
     parse "59-"
     step 3
     assert_equal [-4], stack_data
   end
 
-  def test_multiplication
+  test "multiplication" do
     parse "95*"
     step 3
     assert_equal [45], stack_data
   end
 
-  def test_division
+  test "division" do
     parse "93/"
     step 3
     assert_equal [3], stack_data
   end
 
-  def test_modulus
+  test "modulus" do
     parse "95%"
     step 3
     assert_equal [4], stack_data
   end
 
-  def test_negation
+  test "negation" do
     parse "0!1!5!"
-
     step 2
     assert_equal [1], stack_data
     step 2
@@ -48,123 +49,108 @@ class TestBefungeCommands < Befunge::TestCase
     assert_equal [0, 0, 1], stack_data
   end
 
-  def test_bridge_pound
+  test "bridge pound" do
     parse "32#*+"
-
     step 3
     assert_equal [0,4], pc_coord
     step
     assert_equal [5], stack_data
   end
 
-  def test_pop_dollar_sign
+  test "dollar sign (pop)" do
     parse "5$"
-
     step 2
     assert_equal [], stack_data
   end
 
-  def test_if_underscore
+  test "underscore (if)" do
     parse "0_1_"
-
     step 2
     assert_equal :right, pc.direction
     step 2
     assert_equal :left, pc.direction
   end
 
-  def test_if_pipe
-    program = "v\n0\n|\n1\n|"
-    parse program
-
+  test "pipe (if)" do
+    parse "v\n0\n|\n1\n|"
     step 3
     assert_equal :down, pc.direction
-
     step 2
     assert_equal :up, pc.direction
   end
 
-  def test_duplication_colon
+  test "colon (duplication)" do
     parse "5:"
-
     step 2
     assert_equal [5, 5], stack_data
   end
 
-  def test_swap_backslash
+  test "backslash (swap)" do
     parse "12\\"
-
     step 3
     assert_equal [1, 2], stack_data
   end
 
-  def test_greater_than_backtick
+  test "backtick (greater than)" do
     parse "65`"
-
     step 3
     assert_equal [1], stack_data
 
-    @befunge.restart.parse "25`"
+    reset
+
+    parse "25`"
     step 3
     assert_equal [0], stack_data
   end
 
-  def test_null_command_space
+  test "space (null command)" do
     parse "    22*"
-
     step 6
     assert_equal [2, 2], stack_data
     assert_equal [0, 6], pc_coord
   end
 
-  def test_end_at_symbol
+  test "at symbol (end)" do
     parse "22@+"
-
     step 3
     assert_equal [2, 2], stack_data
     step 3
     assert_equal [0, 2], pc_coord
   end
 
-  def test_string_mode_double_quote
+  test "double quote (string mode)" do
     parse "22*\"abc\"@"
-
-    @befunge.run
+    run!
     assert_equal [99, 98, 97, 4], stack_data
     assert_equal [0, 8], pc_coord
   end
 
-  def test_integer_output_period
+  test "period (integer output)" do
     parse "99*.@"
-
-    @befunge.run
-    assert_equal "81", @befunge.output
+    run!
+    assert_equal "81", output
   end
 
-  def test_ascii_output_comma
+  test "comma (ascii output)" do
     parse "99*9+7+,@"
-
-    @befunge.run
-    assert_equal "a", @befunge.output
+    run!
+    assert_equal "a", output
   end
 
-  def test_get_g
+  test "g (get)" do
     parse "40g +@"
-
-    @befunge.run
+    run!
     assert_equal [43], stack_data
   end
 
-  def test_put_p
+  test "p (put)" do
     parse "67*1+01p@\n "
-
-    @befunge.run
+    run!
     assert_equal "+", program[1][0]
   end
 
-  def test_int_input_ampersand
+  test "ampersand (int input)" do
     parse "&&+@"
-
     set_int_input [4, 5]
     step
     assert_equal [4], stack_data
@@ -172,13 +158,12 @@ class TestBefungeCommands < Befunge::TestCase
     assert_equal [5, 4], stack_data
     step
     assert_equal [9], stack_data
-    assert_equal [], @befunge.int_input
+    assert_equal [], int_input
 
-    @befunge.restart
+    reset
     parse "&,@"
-
-    @befunge.run :int_input => [65]
-    assert_equal "A", @befunge.output
+    run! :int_input => [65]
+    assert_equal "A", output
   end
 
   def test_ascii_input_tilde
@@ -189,12 +174,12 @@ class TestBefungeCommands < Befunge::TestCase
     #assert_equal [65], stack_data
     #step
     #assert_equal [66, 65], stack_data
-    #assert_equal [], @befunge.int_input
+    #assert_equal [], int_input
 
-    #@befunge.restart
+    #reset
     #parse "~.@"
 
-    #@befunge.run :ascii_input => ["A"]
-    #assert_equal "65", @befunge.output
+    #run! :ascii_input => ["A"]
+    #assert_equal "65", output
   end
 end

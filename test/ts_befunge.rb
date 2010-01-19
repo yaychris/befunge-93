@@ -1,5 +1,3 @@
-require "test/unit"
-
 require "tc_array"
 require "tc_stack"
 require "tc_interpreter"

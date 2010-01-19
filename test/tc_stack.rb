@@ -1,45 +1,35 @@
 require "test_helper"
 
 class TestBefungeStack < Befunge::TestCase
-  def setup
+  setup do
     @stack = Befunge::Stack.new
   end
 
-  def test_push
+  should "be able to push" do
     @stack.push "1"
     assert_equal ["1"], @stack.data
   end
 
-  def test_top
+  should "be able to peek at the top" do
     assert_equal 0, @stack.top
     assert_equal [], @stack.data
 
     @stack.push "1"
+
     assert_equal "1", @stack.top
     assert_equal ["1"], @stack.data
   end
 
-  def test_pop_empty_stack
+  should "return 0 when popping an empty stack" do
     assert_equal [], @stack.data
     assert_equal 0, @stack.pop
     assert_equal [], @stack.data
   end
 
-  def test_pop_stack
+  should "be able to pop" do
     @stack.push "1"
     assert_equal "1", @stack.pop
     assert_equal 0, @stack.pop
-    assert_equal [], @stack.data
-  end
-
-  def test_pop_two
-    @stack.push "1"
-    assert_equal ["1", 0], @stack.pop_two
-    assert_equal [], @stack.data
-
-    @stack.push "1"
-    @stack.push "2"
-    assert_equal ["2", "1"], @stack.pop_two
     assert_equal [], @stack.data
   end
 end

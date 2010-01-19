@@ -17,9 +17,5 @@ module Befunge
     def pop
       @data.shift || 0
     end
-
-    def pop_two
-      [pop, pop]
-    end
   end
 end

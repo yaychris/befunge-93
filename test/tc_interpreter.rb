@@ -1,7 +1,7 @@
 require "test_helper"
 
 class TestBefungeInterpreter < Befunge::TestCase
-  def setup
+  setup do
     @befunge = Befunge::Interpreter.new
 
     @simple_input = <<END_INPUT
@@ -25,131 +25,123 @@ END_COMPLEX
   end
 
 
-  ####
-  # Test parser
-  def test_empty_playfield_before_parsing
-    assert_equal 0, program.size
-  end
+  context "when parsing" do
+    should "have an empty playfield before parsing" do
+      assert_equal 0, program.size
+    end
 
+    should "have a full playfield after parsing" do
+      parse @simple_input
 
-  def test_full_size_playfield_after_parsing
-    parse @simple_input
+      assert_equal 25, program.size
+      program.each { |row| assert_equal 80, row.size }
+    end
 
-    assert_equal 25, program.size
-    program.each { |row| assert_equal 80, row.size }
-  end
+    should "successfully parse simple input" do
+      parse @simple_input
 
+      assert_equal ["9", "9", "*", "7", "6", "*", "+"].join, program[0].join
+      assert_equal ["2", "4", "+", "4", "2", "+", "*"].join, program[1].join
+    end
 
-  def test_parse_simple_input
-    parse @simple_input
+    should "successfully parse complex input" do
+      parse @complex_input
 
-    assert_equal ["9", "9", "*", "7", "6", "*", "+"].join, program[0].join
-    assert_equal ["2", "4", "+", "4", "2", "+", "*"].join, program[1].join
-  end
+      assert_equal 25, program.size
+      program.each { |row| assert_equal(80, row.size) }
 
-  def test_parse_complex_input
-    parse @complex_input
+      @complex_input.split(/\n/).each_with_index do |row, i|
+        assert_equal row, program[i].join
+      end
+    end
 
-    assert_equal 25, program.size
-    program.each { |row| assert_equal(80, row.size) }
-
-    @complex_input.split(/\n/).each_with_index do |row, i|
-      assert_equal row, program[i].join
+    should "raise an exception on improperly sized playfield" do
+      assert_raise(Befunge::ParseError) { parse("1" * 81) }
+      assert_raise(Befunge::ParseError) { parse("1\n" * 26) }
     end
   end
 
 
-  def test_raise_on_invalid_input
-    assert_raise(RuntimeError) { parse("1" * 81) }
-    assert_raise(RuntimeError) { parse("1\n" * 26) }
+  context "input" do
+    should "assign empty ASCII input by defualt" do
+      assert_equal [], @befunge.ascii_input
+    end
+
+    should "assign empty int input by default" do
+      assert_equal [], @befunge.int_input
+    end
+
+    should "accept input when calling #run" do
+      parse "@"
+      run! :ascii_input => [">", "^", "<", "v"], :int_input => [1, 2, 3, 4]
+
+      assert_equal [">", "^", "<", "v"], ascii_input
+      assert_equal [1, 2, 3, 4], int_input
+    end
   end
 
 
-  ####
-  # Test input
-  def test_assigns_empty_ascii_input
-    assert_equal [], @befunge.ascii_input
-  end
+  context "program counter" do
+    should "be able to move right" do
+      parse @simple_input
+      pc.direction = :right
+      step
+      assert_equal [0, 1], pc_coord
+      step 6
+      assert_equal [0, 0], pc_coord
+    end
 
-  def test_assigns_empty_int_input
-    assert_equal [], @befunge.int_input
-  end
+    should "be able to move left" do
+      parse @simple_input
+      pc.direction = :left
+      step
+      assert_equal [0, 6], pc_coord
+      step 6
+      assert_equal [0, 0], pc_coord
+    end
 
-  def test_accepts_input_to_run
-    parse "@"
+    should "be able to move up" do
+      parse @simple_input
+      pc.direction = :up
+      step
+      assert_equal [1, 0], pc_coord
+      step
+      assert_equal [0, 0], pc_coord
+    end
 
-    @befunge.run :ascii_input => [">", "^", "<", "v"], :int_input => [1, 2, 3, 4]
-
-    assert_equal [">", "^", "<", "v"], @befunge.ascii_input
-    assert_equal [1, 2, 3, 4], @befunge.int_input
-  end
-
-
-  ####
-  # Test PC movement
-  def test_step_pc_right
-    parse @simple_input
-    pc.direction = :right
-
-    step
-    assert_equal [0, 1], pc_coord
-
-    step 6
-    assert_equal [0, 0], pc_coord
-  end
-
-
-  def test_step_pc_left
-    parse @simple_input
-    pc.direction = :left
-
-    step
-    assert_equal [0, 6], pc_coord
-
-    step 6
-    assert_equal [0, 0], pc_coord
+    should "be able to move down" do
+      parse @simple_input
+      pc.direction = :down
+      step
+      assert_equal [1, 0], pc_coord
+      step
+      assert_equal [0, 0], pc_coord
+    end
   end
 
 
-  def test_step_pc_up
-    parse @simple_input
-    pc.direction = :up
+  context "when running" do
+    should "execute correctly" do
+      parse "23*@55+"
+      run!
 
-    step
-    assert_equal [1, 0], pc_coord
+      assert_equal [6], stack_data
+      assert_equal [0, 3], pc_coord
+    end
 
-    step
-    assert_equal [0, 0], pc_coord
+    should "raise an exception if unknown command" do
+      assert_raise(Befunge::UnknownCommandError) do
+        parse("]")
+        step
+      end
+    end
   end
 
-
-  def test_step_pc_down
-    parse @simple_input
-    pc.direction = :down
-
-    step
-    assert_equal [1, 0], pc_coord
-
-    step
-    assert_equal [0, 0], pc_coord
-  end
-
-
-  def test_run
-    parse "23*@55+"
-
-    @befunge.run
-    assert_equal [6], @befunge.stack.data
-    assert_equal [0, 3], pc_coord
-  end
-
-
-  def test_restart
+  should "be able to reset" do
     parse "52*"
-
     step 3
-    @befunge.restart
-    assert_equal [], @befunge.stack.data
+    reset
+    assert_equal [], stack_data
     assert_equal [0, 0], pc_coord
   end
 end

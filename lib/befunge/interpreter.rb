@@ -1,4 +1,7 @@
 module Befunge
+  class ParseError < StandardError; end
+  class UnknownCommandError < StandardError; end
+
   Directions  = [:up, :down, :left, :right]
 
   class Interpreter
@@ -16,11 +19,15 @@ module Befunge
     end
 
     def parse(input)
-      raise "Parse Error" if input.split(/\n/).compact.size > 25
+      if input.split(/\n/).compact.size > 25
+        raise ParseError, "Program file must be 25 lines or less"
+      end
 
       @program = input.map do |line|
         line.chomp!
-        raise "Parse Error" if line.size > 80
+        if line.size > 80
+          raise ParseError, "Lines must be 80 characters or less"
+        end
         line.scan(/./).ljust(80)
       end
 
@@ -40,11 +47,11 @@ module Befunge
       @int_input    = options[:int_input] || []
 
       loop do
-        break if !step
+        break unless step
       end
     end
 
-    def restart
+    def reset
       @stack = Stack.new
       @pc = PC.new(0, 0, :right)
       @ascii_input = []
@@ -58,7 +65,11 @@ module Befunge
 
       def process_cell
         cell = current_cell
-        raise "Unknown command: #{cell} at (#{@pc.col}, #{@pc.row})" unless Commands.include?(cell)
+
+        unless Commands.include?(cell)
+          raise UnknownCommandError, "Unknown command: #{cell} at (#{@pc.col}, #{@pc.row})"
+        end
+
         instance_eval(&Commands[cell])
         cell
       end
